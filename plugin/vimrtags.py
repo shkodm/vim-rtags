@@ -96,7 +96,7 @@ def parse_completion_result(data):
       elif k == 'TypedefDecl' or k == 'StructDecl' or k == 'EnumConstantDecl':
         kind = 't'
 
-      match = {'menu': c['completion'], 'word': c['completion'], 'kind': kind}
+      match = {'menu': c['signature'], 'word': c['completion'], 'kind': kind}
       completions.append(match)
 
     return completions
@@ -136,10 +136,10 @@ def display_locations(errors, buffer):
 
     if int(get_rtags_variable('UseLocationList')) == 1:
         vim.eval('setloclist(%d, %s)' % (buffer.number, error_data))
-        vim.command('lopen %d' % height)
+       #  vim.command('lopen %d' % height)
     else:
         vim.eval('setqflist(%s)' % error_data)
-        vim.command('copen %d' % height)
+       # vim.command('copen %d' % height)
 
 def display_diagnostics_results(data, buffer):
     data = json.loads(data)
