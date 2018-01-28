@@ -80,24 +80,28 @@ def parse_completion_result(data):
     logging.debug(result)
     completions = []
 
+    # ranking of completitions 
+    ordering = {'[f]':1,'[v]':2,'[d]':3,'[e]':4,'[c]':5,'[u]':6}
     for c in result['completions']:
       k = c['kind']
-      kind = ''
-      if k == 'FunctionDecl' or k == 'FunctionTemplate':
-        kind = 'f'
-      elif k == 'CXXMethod' or k == 'CXXConstructor':
-        kind = 'm'
-      elif k == 'VarDecl':
-        kind = 'v'
-      elif k == 'macro definition':
-        kind = 'd'
-      elif k == 'EnumDecl':
-        kind = 'e'
-      elif k == 'TypedefDecl' or k == 'StructDecl' or k == 'EnumConstantDecl':
-        kind = 't'
+      
+      if k in ["CXXMethod","CXXConstructor","CXXDestructor","Constructor", "FunctionDecl","FunctionTemplate","Destructor"]:
+          kind = '[f]'
+      elif k in ['VarDecl',"FieldDecl","ParmDecl"]:
+          kind = '[v]'
+      elif k in ['macro definition','include directive']:
+          kind = '[d]'
+      elif k in ['EnumDecl', "EnumConstantDecl"]:
+          kind = '[e]'
+      elif k in ["ClassDecl","StructDecl","ClassTemplate"]:
+          kind = '[c]'
+      else:
+          kind = '[u]'
 
-      match = {'menu': c['signature'], 'word': c['completion'], 'kind': kind}
+      match = {'menu': c['signature'], 'word': c['completion'], 'kind': kind, 'info': c['brief_comment']}
       completions.append(match)
+
+    completions.sort(cmp = lambda x,y : cmp(ordering[x['kind'][:3]], ordering[y['kind'][:3]]))
 
     return completions
 
@@ -136,10 +140,10 @@ def display_locations(errors, buffer):
 
     if int(get_rtags_variable('UseLocationList')) == 1:
         vim.eval('setloclist(%d, %s)' % (buffer.number, error_data))
-       #  vim.command('lopen %d' % height)
+        vim.command('lopen %d' % height)
     else:
         vim.eval('setqflist(%s)' % error_data)
-       # vim.command('copen %d' % height)
+        vim.command('copen %d' % height)
 
 def display_diagnostics_results(data, buffer):
     data = json.loads(data)
